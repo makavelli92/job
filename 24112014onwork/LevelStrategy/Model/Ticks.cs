@@ -8,6 +8,10 @@ namespace LevelStrategy
 {
     public class Ticks : Data
     {
+        public Ticks()
+        {
+            timeToAction = new List<DateTime>();
+        }
         public override string Name { get; set; }
 
         public override int TimeFrame { get; set; }
@@ -26,22 +30,45 @@ namespace LevelStrategy
 
         public List<DateTime> timeToAction { get; set; }
 
+        public int SecondsCycle { get; set; } = 20;
+
         public void CalculateListMinuts()
         {
             if (this.timeToAction.Count == 0)
             {
-                if (TimeFrame < 60)
-                {
-                    DateTime time = DateTime.Now.Date.AddHours(10).AddMinutes(-5);
-                    DateTime fine = DateTime.Now.Date.AddHours(23).AddMinutes(50);
 
-                    while (time < fine)
+                if (ClassCod == "TQBR")
+                {
+                    DateTime time = DateTime.Now.Date.AddHours(10);
+                    DateTime fine = DateTime.Now.Date.AddHours(18).AddMinutes(45);
+
+                    while (time.AddSeconds(SecondsCycle) <= fine)
                     {
-                        time = time.AddMinutes(5);
-                        if (time <= DateTime.Now.Date.AddHours(18).AddMinutes(45) || time >= DateTime.Now.Date.AddHours(19))
-                        {
-                            timeToAction.Add(time);
-                        }
+                        timeToAction.Add(time.AddSeconds(SecondsCycle));
+
+                        time = time.AddSeconds(SecondsCycle);
+                    }
+                }
+                else if (ClassCod == "SPBFUT")
+                {
+                    DateTime time = DateTime.Now.Date.AddHours(10);
+                    DateTime fine = DateTime.Now.Date.AddHours(18).AddMinutes(45);
+
+                    while (time.AddSeconds(SecondsCycle) <= fine)
+                    {
+                        timeToAction.Add(time.AddSeconds(SecondsCycle));
+
+                        time = time.AddSeconds(SecondsCycle);
+                    }
+
+                    time = DateTime.Now.Date.AddHours(19);
+                    fine = DateTime.Now.Date.AddHours(23).AddMinutes(50);
+
+                    while (time.AddSeconds(SecondsCycle) <= fine)
+                    {
+                        timeToAction.Add(time.AddSeconds(SecondsCycle));
+
+                        time = time.AddSeconds(SecondsCycle);
                     }
                 }
             }

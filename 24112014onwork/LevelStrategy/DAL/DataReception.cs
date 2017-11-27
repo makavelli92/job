@@ -127,6 +127,16 @@ public class DataReception
                             temp += i.ClassCod + ';' + i.Name + ';' + i.TimeFrame + ';' + i.Count;
                         }
                     }
+                    //foreach (Ticks i in listBars.OfType<Ticks>().Where(x => x.timeToAction.Contains(currentTime)))
+                    //{
+                    //    if (i.ProcessType == "SendCommand" && i.Count > 0)
+                    //    {
+                    //        i.ProcessType = "Accept";
+                    //        if (temp != String.Empty)
+                    //            temp += ';';
+                    //        temp += i.ClassCod + ';' + i.Name + ';' + i.TimeFrame + ';' + i.Count;
+                    //    }
+                    //}
                 }
 
                 mtx.ReleaseMutex();
@@ -185,9 +195,6 @@ public class DataReception
 
         SR_FlagCommand = new StreamReader(FlagCommand.CreateViewStream(), System.Text.Encoding.Default);
         SW_FlagCommand = new StreamWriter(FlagCommand.CreateViewStream(), System.Text.Encoding.Default);
-        //Task.Run(() => {
-        //    CycleSetCommand(SW_Command, SR_FlagCommand, SW_FlagCommand);
-        //});
 
 
         string Msg = "";
@@ -207,9 +214,9 @@ public class DataReception
         //    DataReception.SetQUIKCommandData(SW_Command, SR_FlagCommand, SW_FlagCommand, GetCommandString(Security.GMKN, TimeFrame.INTERVAL_M5));
         //});
 
-
-        // Цикл работает пока Run == true
+        
         int m = 0;
+
         while (cycleRead)
         {
             do
@@ -230,11 +237,9 @@ public class DataReception
                 ++m;
 
                 Logger.Info($@"Обнаружил какие-то данные, пытаюсь считать..");
-
-                //     Console.WriteLine("Get data from c++");
+                
                 if (flag == "p")
                 {
-                    //      Console.WriteLine("Get data == p");
                     string str;
                     do
                     {
@@ -247,7 +252,7 @@ public class DataReception
                             // Считывает данные из потока памяти, обрезая ненужные байты
                             str = SR_Memory.ReadToEnd().Trim('\0', '\r', '\n');
                             Msg += str;
-                            //        Console.WriteLine(Msg.Length);
+
                             // Встает в начало потока для записи
                             SW_Memory.BaseStream.Seek(0, SeekOrigin.Begin);
                             // Очищает память, заполняя "нулевыми байтами"
@@ -472,11 +477,15 @@ public class DataReception
 
             for (int i = 0; i < substrings.Length - 1; i = i + 4)
             {
-                Data temp = listBars.FirstOrDefault(x => x.Name == substrings[i + 1] && x.TimeFrame == Int32.Parse(substrings[2]));
+                Data temp = listBars.FirstOrDefault(x => x.Name == substrings[i + 1] && x.TimeFrame == Int32.Parse(substrings[i + 2]));
                 if (temp == null)
                 {
                     if (substrings[i + 2] == "0")
+                    {
                         listBars.Add(new Ticks() { ClassCod = substrings[i], Name = substrings[i + 1], TimeFrame = Int32.Parse(substrings[i + 2]), Time = new List<DateTime>(), Close = new List<double>(), Volume = new List<double>() });
+                        listBars.OfType<Ticks>().Last().CalculateListMinuts();
+                        AddToTimer(listBars.OfType<Ticks>().Last().timeToAction, this.timers);
+                    }
                     else
                     {
                         listBars.Add(new Bars() { ClassCod = substrings[i], Name = substrings[i + 1], TimeFrame = Int32.Parse(substrings[i + 2]), Time = new List<DateTime>(), Open = new List<double>(), High = new List<double>(), Low = new List<double>(), Close = new List<double>(), Volume = new List<double>(), NumberGrid = listBars.Count, listSignal = new List<SignalData>() });
